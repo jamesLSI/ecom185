@@ -170,7 +170,9 @@ crime_w_population_data <- crime_data %>%
          offence_group_per_100k,
          offence_subgroup_per_100k,
          offence_per_100k,
-         everything())
+         everything()) %>% 
+  ### create combined financial year and financial quarter variable
+  mutate(fy_q = paste(FinancialYear, FinancialQuarter, sep = "_"))
 
 
 
