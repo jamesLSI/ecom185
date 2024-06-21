@@ -14,7 +14,7 @@ vline <- function(x = 0, color = "green") {
 }
 
 crime_w_population_data %>%
-  filter(!PFA23NM == "London, City of") %>% 
+  filter(!PFA23NM == "London, City of") %>%
   filter(OffenceGroup == "Criminal damage and arson") %>% 
   distinct(PFA23NM,
            fy_q,
