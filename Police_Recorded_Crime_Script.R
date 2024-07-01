@@ -175,13 +175,62 @@ crime_w_population_data <- crime_data %>%
   mutate(fy_q = paste(FinancialYear, FinancialQuarter, sep = "_"))
 
 
+year_quarter_lookup <- tibble(year = rep(2012, 3),
+                              quarter = rep(2:4,1)) %>% 
+  bind_rows(tibble(year = rep(2013:2024, each = 4),
+                   quarter = rep(1:4,12))) %>% 
+  arrange(year, quarter) %>% 
+  mutate(FinancialYear = if_else(quarter %in% c(2, 3,  4),
+                                 paste0(year, "/", str_sub(year +1, start = 3, end = 4)),
+                                 paste0(year - 1, "/", str_sub(year, 3, 4))),
+         FinancialQuarter = if_else(quarter %in% c(2, 3,  4),
+                                    quarter-1,
+                                    4))
+
+pcc_by_year <- read_excel("data/pcc_list_by_year.xlsx",
+                          sheet = "wider",
+                          .name_repair = namesFunction) %>% 
+  mutate(PFA23NM = str_replace_all(NameInDataset,
+                                   "&",
+                                   "and"),
+         PFA23NM = if_else(PFA23NM == "Metropolitan Police Service",
+                           "Metropolitan Police",
+                           PFA23NM)) %>% 
+  select(PFA23NM,
+         everything(),
+         -NameInDataset) %>% 
+  pivot_longer(2:ncol(.),
+               names_to = "year",
+               values_to = "party") %>% 
+  mutate(year = str_remove_all(year,
+                               "X"),
+         year = as.numeric(year)) %>% 
+  left_join(year_quarter_lookup,
+            by = join_by(year),
+            relationship = "many-to-many") %>% 
+  arrange(PFA23NM,
+          year,
+          quarter) %>% 
+  mutate(party = if_else(quarter == 1,
+                         lag(party,
+                             1),
+                         party)) %>% 
+  select(-c(year,
+            quarter))
+
+crime_w_population_w_pcc_data <- crime_w_population_data %>% 
+  left_join(pcc_by_year,
+            by = join_by(FinancialYear, FinancialQuarter, PFA23NM))
 
 ## remove extraneous objects ####
 rm(crime_data,
+   crime_w_population_data,
    police_force_LAD23_lookup,
    population_data,
    population_data_pfa,
-   i)
+   i,
+   year_quarter_lookup,
+   pcc_by_year)
 
 
 
