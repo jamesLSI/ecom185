@@ -179,6 +179,13 @@ year_quarter_lookup <- tibble(year = rep(2012, 3),
                               quarter = rep(2:4,1)) %>% 
   bind_rows(tibble(year = rep(2013:2024, each = 4),
                    quarter = rep(1:4,12))) %>% 
+  left_join(tibble(quarter = 1:4,
+                   date = c("01-01",
+                            "01-04",
+                            "01-07",
+                            "01-10")),
+            by = join_by(quarter)) %>% 
+  mutate(date = lubridate::dmy(paste0(date,"-",year))) %>% 
   arrange(year, quarter) %>% 
   mutate(FinancialYear = if_else(quarter %in% c(2, 3,  4),
                                  paste0(year, "/", str_sub(year +1, start = 3, end = 4)),
@@ -231,6 +238,28 @@ rm(crime_data,
    i,
    year_quarter_lookup,
    pcc_by_year)
+
+pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
+                               sheet = 1,
+                               .name_repair = namesFunction) %>% 
+  select(1:8,
+         -X2024) %>% 
+  rename(change_type = X) %>% 
+  mutate(PFA23NM = str_replace_all(NameInDataset,
+                                   "&",
+                                   "and"),
+         PFA23NM = if_else(PFA23NM == "Metropolitan Police Service",
+                           "Metropolitan Police",
+                           PFA23NM)) %>% 
+  mutate(when_change = if_else(X2012 != X2016,
+                               lubridate::dmy("05-05-2016"),
+                               if_else(X2016 != X2021,
+                                       lubridate::dmy("06-05-2021"),
+                                       lubridate::dmy("15-11-2012")))) %>% 
+  select(PFA23NM,
+         change_type,
+         when_change,
+         everything())
 
 
 
