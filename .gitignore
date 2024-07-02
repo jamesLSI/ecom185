@@ -2,6 +2,5 @@
 .Rhistory
 .RData
 pcc_boundaries.html
-police_force_names.csv
-Police Recorded Crime Data.ods
 criminal_damagae_arson_pcc_rates.html
+data/Police Recorded Crime Data.ods
