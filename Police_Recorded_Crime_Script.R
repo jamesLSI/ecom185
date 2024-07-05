@@ -255,7 +255,7 @@ pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
                                lubridate::dmy("05-05-2016"),
                                if_else(X2016 != X2021,
                                        lubridate::dmy("06-05-2021"),
-                                       lubridate::dmy("15-11-2012")))) %>% 
+                                       NA))) %>% 
   select(PFA23NM,
          change_type,
          when_change,
