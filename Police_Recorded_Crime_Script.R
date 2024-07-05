@@ -244,7 +244,6 @@ pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
                                .name_repair = namesFunction) %>% 
   select(1:8,
          -X2024) %>% 
-  rename(change_type = X) %>% 
   mutate(PFA23NM = str_replace_all(NameInDataset,
                                    "&",
                                    "and"),
@@ -257,7 +256,7 @@ pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
                                        lubridate::dmy("06-05-2021"),
                                        NA))) %>% 
   select(PFA23NM,
-         change_type,
+         ChangeType,
          when_change,
          everything())
 
