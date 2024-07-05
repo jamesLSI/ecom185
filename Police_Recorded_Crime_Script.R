@@ -192,7 +192,8 @@ year_quarter_lookup <- tibble(year = rep(2012, 3),
                                  paste0(year - 1, "/", str_sub(year, 3, 4))),
          FinancialQuarter = if_else(quarter %in% c(2, 3,  4),
                                     quarter-1,
-                                    4))
+                                    4)) %>% 
+  mutate(period = row_number())
 
 pcc_by_year <- read_excel("data/pcc_list_by_year.xlsx",
                           sheet = "wider",
