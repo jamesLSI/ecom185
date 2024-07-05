@@ -18,17 +18,23 @@ crime_data_w_treatment_dummy_conservative <- crime_w_population_w_pcc_data %>%
               distinct(PFA23NM,
                        ChangeType),
             by = join_by(PFA23NM)) %>% 
-  mutate(treated = if_else((date > when_change),
+  mutate(treat = if_else(ChangeType == "One change",
+                         1,
+                         0)) %>% 
+  mutate(post = if_else((date > when_change),
                            1,
                            0),
-         treated = if_else(is.na(treated),
-                           0,
-                           treated))
+         post = if_else(is.na(post),
+                        0,
+                        post)) %>% 
+  mutate(treatd = treat*post)
 
 
 crime_data_w_treatment_dummy_conservative %>% 
   count(PFA23NM,
-        treated) %>% 
+        ChangeType,
+        treat,
+        treatd) %>% 
   print(n = nrow(.))
 
 crime_data_w_treatment_dummy_conservative %>%
@@ -39,9 +45,16 @@ crime_data_w_treatment_dummy_conservative %>%
            OffenceGroup,
            .keep_all = T) %>% 
   filter(OffenceGroup == "Criminal damage and arson") %>% 
-  ggplot(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,colour=factor(treated))) + 
+  ggplot(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,colour=factor(treat))) + 
   geom_point(alpha=0.05) + 
-  geom_smooth(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,group=factor(treated)),formula = y~x, method="lm") + theme_bw()
+  geom_smooth(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,group=factor(treat)),formula = y~x, method="lm") + theme_bw()
+
+
+con_treat_reg1 <- crime_data_w_treatment_dummy_conservative %>% 
+  feols(offence_group_per_100k~treat+treatd)
+con_treat_reg2 <- crime_data_w_treatment_dummy_conservative %>%
+  feols(offence_group_per_100k~+treatd| PFA23NM+fy_q)
+etable(con_treat_reg1,con_treat_reg2,signifCode=c("***"=0.01, "**"=0.05, "*"=0.10),se.below=TRUE)
 
 
 
@@ -63,17 +76,23 @@ crime_data_w_treatment_dummy_labour <- crime_w_population_w_pcc_data %>%
               distinct(PFA23NM,
                        ChangeType),
             by = join_by(PFA23NM)) %>% 
-  mutate(treated = if_else((date > when_change),
-                           1,
-                           0),
-         treated = if_else(is.na(treated),
-                           0,
-                           treated))
+  mutate(treat = if_else(ChangeType == "One change",
+                         1,
+                         0)) %>% 
+  mutate(post = if_else((date > when_change),
+                        1,
+                        0),
+         post = if_else(is.na(post),
+                        0,
+                        post)) %>% 
+  mutate(treatd = treat*post)
 
 
 crime_data_w_treatment_dummy_labour %>% 
   count(PFA23NM,
-        treated) %>% 
+        ChangeType,
+        treat,
+        treatd) %>% 
   print(n = nrow(.))
 
 crime_data_w_treatment_dummy_labour %>%
@@ -84,6 +103,13 @@ crime_data_w_treatment_dummy_labour %>%
            OffenceGroup,
            .keep_all = T) %>% 
   filter(OffenceGroup == "Criminal damage and arson") %>% 
-  ggplot(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,colour=factor(treated))) + 
+  ggplot(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,colour=factor(treat))) + 
   geom_point(alpha=0.05) + 
-  geom_smooth(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,group=factor(treated)),formula = y~x, method="lm") + theme_bw()
+  geom_smooth(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,group=factor(treat)),formula = y~x, method="lm") + theme_bw()
+
+
+lab_treat_reg1 <- crime_data_w_treatment_dummy_labour %>% 
+  feols(offence_group_per_100k~treat+treatd)
+lab_treat_reg2 <- crime_data_w_treatment_dummy_labour %>%
+  feols(offence_group_per_100k~+treatd| PFA23NM+fy_q)
+etable(con_treat_reg1,con_treat_reg2,signifCode=c("***"=0.01, "**"=0.05, "*"=0.10),se.below=TRUE)
