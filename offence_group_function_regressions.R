@@ -1,4 +1,5 @@
 library(fixest)
+library(UsefulFunctions)
 if (!exists("crime_w_population_w_pcc_data")) {
   source("Police_Recorded_Crime_Script.R")
 }
@@ -40,7 +41,7 @@ etable("Criminal damage and arson" = no_fe_output[[1]],
        "Sexual offences" = no_fe_output[[7]],
        "Theft offences" = no_fe_output[[8]],
        "Violence against the person" = no_fe_output[[9]]) %>% 
-  UsefulFunctions::clipboard_it()
+  clipboard_it()
 
 ## party impact on crime rates PLACE FE ####
 ### make function
