@@ -25,8 +25,7 @@ offence_groups_no_fe_function <- function(offence_group){
     filter(OffenceGroup == offence_group) %>%
     feols(fml = offence_group_per_100k~party)
   
-  return(assign(paste0(model_output, "_", offence_group),
-                model_output))
+  return(model_output)
   
 }
 ### run funtion ####
@@ -56,8 +55,7 @@ offence_groups_fe_place_function <- function(offence_group){
     filter(OffenceGroup == offence_group) %>%
     feols(fml = offence_group_per_100k~party | PFA23NM)
   
-  return(assign(paste0(model_output, "_", offence_group),
-                model_output))
+  return(model_output)
   
 }
 
@@ -89,8 +87,7 @@ offence_groups_fe_time_function <- function(offence_group){
     filter(OffenceGroup == offence_group) %>%
     feols(fml = offence_group_per_100k~party | fy_q)
   
-  return(assign(paste0(model_output, "_", offence_group),
-                model_output))
+  return(model_output)
   
 }
 
@@ -123,8 +120,7 @@ offence_groups_fe_place_time_function <- function(offence_group){
     filter(OffenceGroup == offence_group) %>%
     feols(fml = offence_group_per_100k~party | PFA23NM+fy_q)
   
-  return(assign(paste0(model_output, "_", offence_group),
-                model_output))
+  return(model_output)
   
 }
 
@@ -142,3 +138,4 @@ etable("Criminal damage and arson" = fe_place_time_output[[1]],
        "Theft offences" = fe_place_time_output[[8]],
        "Violence against the person" = fe_place_time_output[[9]]) %>% 
   clipboard_it()
+
