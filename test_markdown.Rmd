@@ -57,12 +57,10 @@ cdaa <- crime_data_w_treatment_dummy_conservative %>%
   geom_smooth(aes(x=factor(period),y=offence_group_per_100k,group=factor(treatd)),formula = y~x, method="lm") + 
   theme(panel.grid.minor = element_blank()) +
   theme_bw() +
-  labs(title = "Criminal Damage and Arson DiD", x = "Period", y = "Crimes per 100k poulation")
+  labs(title = "Criminal Damage and Arson DiD", x = "Period", y = "Crimes per 100k poulation", color = "1 = Conversative")
 ```
 
-## Including Plots
-
-You can also embed plots, for example this one looking at Criminal damage and arson:
+## Difference in Difference plot for Criminal Damage and Arson
 
 ```{r, echo=FALSE, fig.dim = c(12, 6)}
 plot(cdaa)
