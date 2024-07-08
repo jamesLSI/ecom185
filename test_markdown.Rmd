@@ -6,7 +6,7 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, error = FALSE)
 library(fixest)
 ## read in data only if it doesn't already exist in the environment
 if (!exists("crime_w_population_w_pcc_data")) {
