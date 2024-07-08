@@ -8,7 +8,4 @@ James Currer
 You can also embed plots, for example this one looking at Criminal
 damage and arson:
 
-![](test_markdown_files/figure-gfm/pressure-1.png)<!-- -->
-
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
+![](test_markdown_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->

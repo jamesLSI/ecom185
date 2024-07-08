@@ -8,6 +8,7 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, error = FALSE)
 library(fixest)
+library(plotly)
 ## read in data only if it doesn't already exist in the environment
 if (!exists("crime_w_population_w_pcc_data")) {
   source("Police_Recorded_Crime_Script.R")
@@ -53,15 +54,17 @@ cdaa <- crime_data_w_treatment_dummy_conservative %>%
   filter(OffenceGroup == "Criminal damage and arson") %>% 
   ggplot(aes(x=factor(period),y=offence_group_per_100k,colour=factor(treatd))) + 
   geom_point(alpha=0.05) + 
-  geom_smooth(aes(x=factor(period),y=offence_group_per_100k,group=factor(treatd)),formula = y~x, method="lm") + theme_bw()
+  geom_smooth(aes(x=factor(period),y=offence_group_per_100k,group=factor(treatd)),formula = y~x, method="lm") + 
+  theme(panel.grid.minor = element_blank()) +
+  theme_bw() +
+  labs(title = "Criminal Damage and Arson DiD", x = "Period", y = "Crimes per 100k poulation")
 ```
 
 ## Including Plots
 
 You can also embed plots, for example this one looking at Criminal damage and arson:
 
-```{r pressure, echo=FALSE}
+```{r, echo=FALSE, fig.dim = c(12, 6)}
 plot(cdaa)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
