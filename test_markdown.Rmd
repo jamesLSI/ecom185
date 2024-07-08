@@ -6,25 +6,62 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+knitr::opts_chunk$set(echo = F)
+library(fixest)
+## read in data only if it doesn't already exist in the environment
+if (!exists("crime_w_population_w_pcc_data")) {
+  source("Police_Recorded_Crime_Script.R")
+}
 
-## R Markdown
+## Conservative treatment ####
+### table of only PCCs that are Labour in 2012 ####
+### this include those that are always abour and those that change.Excluding 2024 election they all happen to move to Conservative
+labour_pccs <- pcc_change_table %>% 
+  filter(X2012 == "Labour")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### prepare data for regression ####
+crime_data_w_treatment_dummy_conservative <- crime_w_population_w_pcc_data %>% 
+  ## add in change date, and change type
+  left_join(x = labour_pccs %>% 
+              select(PFA23NM,
+                     when_change,
+                     ChangeType),
+            y = .,
+            by = join_by(PFA23NM)) %>% 
+  ## create treatment dummy based on whether it changes party
+  mutate(treat = if_else(ChangeType == "One change",
+                         1,
+                         0)) %>% 
+  ## create post dummy based on election when changed]
+  mutate(post = if_else((date > when_change),
+                           1,
+                           0),
+         post = if_else(is.na(post),
+                        0,
+                        post)) %>% 
+  ## create a treat x post dummy given heterogeneous timing
+  mutate(treatd = treat*post)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+### plot it ####
+cdaa <- crime_data_w_treatment_dummy_conservative %>%
+  filter(!PFA23NM == "London, City of") %>% 
+  distinct(FinancialYear,
+           FinancialQuarter,
+           PFA23NM,
+           OffenceGroup,
+           .keep_all = T) %>% 
+  filter(OffenceGroup == "Criminal damage and arson") %>% 
+  ggplot(aes(x=factor(period),y=offence_group_per_100k,colour=factor(treatd))) + 
+  geom_point(alpha=0.05) + 
+  geom_smooth(aes(x=factor(period),y=offence_group_per_100k,group=factor(treatd)),formula = y~x, method="lm") + theme_bw()
 ```
 
 ## Including Plots
 
-You can also embed plots, for example:
+You can also embed plots, for example this one looking at Criminal damage and arson:
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+plot(cdaa)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
