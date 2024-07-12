@@ -228,7 +228,7 @@ crime_data_w_treatment_dummy_conservative <- crime_w_population_w_pcc_data %>%
 offence_groups_fe_place_time_did_function <- function(offence_group){
   model_output <- crime_data_w_treatment_dummy_conservative %>%
     filter(OffenceGroup == offence_group) %>%
-    feols(offence_group_per_100k~+treatd| PFA23NM+fy_q)
+    feols(offence_group_per_100k~treatd | PFA23NM+fy_q)
   
   return(model_output)
   

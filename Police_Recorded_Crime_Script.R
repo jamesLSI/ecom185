@@ -226,19 +226,47 @@ pcc_by_year <- read_excel("data/pcc_list_by_year.xlsx",
   select(-c(year,
             quarter))
 
-crime_w_population_w_pcc_data <- crime_w_population_data %>% 
+crime_w_population_w_pcc_data_no_pop <- crime_w_population_data %>% 
   left_join(pcc_by_year,
             by = join_by(FinancialYear, FinancialQuarter, PFA23NM))
+
+## read in police numbers data ####
+
+annual_police_numbers <- readODS::read_ods("data/open-data-table-police-workforce-260723.ods",
+                                           sheet = "Data",
+                                           .name_repair = namesFunction) %>% 
+  mutate(FinancialYear = paste0(AsAt31March-1,
+                                "/",
+                                str_sub(AsAt31March,
+                                        3, 4))) %>% 
+  mutate(TotalFte = suppressWarnings(as.numeric(TotalFte))) %>% 
+  group_by(FinancialYear,
+           PFA23NM = ForceName) %>% 
+  summarise(total = sum(TotalHeadcount,
+                        na.rm = T),
+            total_fte = sum(TotalFte,
+                            na.rm = T),
+            .groups = "drop")
+
+## add to crime and pcc data ####
+
+crime_w_population_w_pcc_data <- crime_w_population_w_pcc_data_no_pop %>% 
+  left_join(annual_police_numbers,
+            by = join_by(FinancialYear, PFA23NM)) %>% 
+  mutate(police_per_100k_pop = total/(pfa_population/100000),
+         police_fte_per_100k_pop = total_fte/(pfa_population/100000))
 
 ## remove extraneous objects ####
 rm(crime_data,
    crime_w_population_data,
+   crime_w_population_w_pcc_data_no_pop,
    police_force_LAD23_lookup,
    population_data,
    population_data_pfa,
    i,
    year_quarter_lookup,
-   pcc_by_year)
+   pcc_by_year,
+   annual_police_numbers)
 
 pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
                                sheet = 1,
