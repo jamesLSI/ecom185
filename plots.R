@@ -1,4 +1,6 @@
-source("Police_Recorded_Crime_Script.R")
+if (!exists("crime_w_population_w_pcc_data")) {
+  source("data_prep.R")
+}
 library(plotly)
 
 vline <- function(x = 0, color = "green") {

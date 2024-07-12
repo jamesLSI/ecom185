@@ -1,7 +1,7 @@
 library(fixest)
 library(UsefulFunctions)
 if (!exists("crime_w_population_w_pcc_data")) {
-  source("Police_Recorded_Crime_Script.R")
+  source("data_prep.R")
 }
 
 ## make list of offence groups ####

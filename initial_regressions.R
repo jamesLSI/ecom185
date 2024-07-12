@@ -1,7 +1,7 @@
 library(fixest)
 ## read in data only if it doesn't already exist in the environment
 if (!exists("crime_w_population_w_pcc_data")) {
-  source("Police_Recorded_Crime_Script.R")
+  source("data_prep.R")
 }
 
 ## table of only PCCs that change once (excludes 2024 changes) 
