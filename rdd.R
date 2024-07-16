@@ -120,29 +120,8 @@ for (value in names(filtered_dfs)){
   assign(paste0("df_",value),filtered_dfs[[value]])
 }
 
-### all crime summary  data ####
-all_crimes <- crime_w_population_w_pcc_data %>% 
-  group_by(FinancialYear,
-           FinancialQuarter,
-           PFA23NM,
-           fy_q,
-           period) %>% 
-  summarise(all_crime = sum(NumberOfOffences,
-                            na.rm = T),
-            .groups = "drop") %>% 
-  left_join(crime_w_population_w_pcc_data %>% 
-              distinct(PFA23NM,
-                       fy_q,
-                       pfa_population,
-                       party,
-                       date,
-                       period)) %>% 
-  mutate(crime_rate = all_crime/pfa_population)
-
-
-
-
-all_crimes_treated <- all_crimes %>% 
+### all crime treated  data ####
+all_crimes_treated <- total_crime_numbers_and_rate_w_population_w_pcc %>% 
   left_join(crime_data_w_treatment_dummy_conservative %>% 
               distinct(PFA23NM,
                        FinancialYear,
@@ -177,84 +156,85 @@ not_rdd_df <- all_crimes_treated_rdd %>% filter(PFA23NM == "Nottinghamshire")
 
 ### RDD PLOTS FOR EACH FORCE WITH DASHED LINE AT POINT OF PCC CHANGE ###
 
-ggplot(bed_rdd_df, aes(x = period, y= crime_rate)) +
+ggplot(bed_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
   geom_point() +
   geom_vline(xintercept = 17, linetype = "dashed") +
-  labs (title = "Bedfordshire PCC Change", x = "time period", y="crime rate")
+  labs (title = "Bedfordshire PCC Change", x = "Time Period", y="Crime Rate")
 
 ### new plot
 bed_plot <- bed_rdd_df %>% 
   mutate(threshold = as.factor(treatd)) %>% 
-  ggplot(aes(x = period, y= crime_rate, color = threshold)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) + 
+  ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
+  geom_point(show.legend = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
   geom_vline(xintercept = 17, linetype = "dashed") +
-  labs (title = "Bedfordshire PCC Change", x = "time period", y="crime rate")
+  labs (title = "Bedfordshire PCC Change", x = "Time Period", y="Crime Rate",
+        color = "")
 
-ggplot(cle_rdd_df, aes(x = period, y= crime_rate)) +
+ggplot(cle_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
   geom_point() +
   geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Cleveland PCC Change", x = "time period", y="crime rate")
+  labs (title = "Cleveland PCC Change", x = "Time Period", y="Crime Rate")
 
 ### new plot
 cleve_plot <- cle_rdd_df %>% 
   mutate(threshold = as.factor(treatd)) %>% 
-  ggplot(aes(x = period, y= crime_rate, color = threshold)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) + 
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Cleveland PCC Change", x = "time period", y="crime rate")
+  ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
+  geom_point(show.legend = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
+  geom_vline(xintercept = 17, linetype = "dashed") +
+  labs (title = "Cleveland PCC Change", x = "Time Period", y="Crime Rate")
   
-ggplot(der_rdd_df, aes(x = period, y= crime_rate)) +
+ggplot(der_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
   geom_point() +
   geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Derbyshire PCC Change", x = "time period", y="crime rate")
+  labs (title = "Derbyshire PCC Change", x = "Time Period", y="Crime Rate")
 
 ### new plot
 derby_plot <- der_rdd_df %>% 
   mutate(threshold = as.factor(treatd)) %>% 
-  ggplot(aes(x = period, y= crime_rate, color = threshold)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) + 
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Derbyshire PCC Change", x = "time period", y="crime rate")
+  ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
+  geom_point(show.legend = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
+  geom_vline(xintercept = 17, linetype = "dashed") +
+  labs (title = "Derbyshire PCC Change", x = "Time Period", y="Crime Rate")
 
 
-ggplot(lan_rdd_df, aes(x = period, y= crime_rate)) +
+ggplot(lan_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
   geom_point() +
   geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Lancashire PCC Change", x = "time period", y="crime rate")
+  labs (title = "Lancashire PCC Change", x = "Time Period", y="Crime Rate")
 ### new plot
 lancs_plot <- lan_rdd_df %>% 
   mutate(threshold = as.factor(treatd)) %>% 
-  ggplot(aes(x = period, y= crime_rate, color = threshold)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) + 
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Lancashire PCC Change", x = "time period", y="crime rate")
+  ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
+  geom_point(show.legend = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
+  geom_vline(xintercept = 17, linetype = "dashed") +
+  labs (title = "Lancashire PCC Change", x = "Time Period", y="Crime Rate")
 
-ggplot(not_rdd_df, aes(x = period, y= crime_rate)) +
+ggplot(not_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
   geom_point() +
   geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Nottinghamshire PCC Change", x = "time period", y="crime rate")
+  labs (title = "Nottinghamshire PCC Change", x = "Time Period", y="Crime Rate")
 ### new plot
 notts_plot <-  not_rdd_df %>% 
   mutate(threshold = as.factor(treatd)) %>% 
-  ggplot(aes(x = period, y= crime_rate, color = threshold)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) + 
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Nottinghamshire PCC Change", x = "time period", y="crime rate")
+  ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
+  geom_point(show.legend = FALSE) +
+  geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
+  geom_vline(xintercept = 17, linetype = "dashed") +
+  labs (title = "Nottinghamshire PCC Change", x = "Time Period", y="Crime Rate")
 
 gridExtra::grid.arrange(bed_plot, cleve_plot, derby_plot, lancs_plot, notts_plot)
 
 ### RDD REGRESSIONS NO HETEROGENEITY OR DIFFERENCE IN SLOPE CONTROLS ###
 
-fit1_bed <- feols(crime_rate~period+treatd,data=bed_rdd_df,vcov="hetero")
-fit1_cle <- feols(crime_rate~period+treatd,data=cle_rdd_df,vcov="hetero")
-fit1_der <- feols(crime_rate~period+treatd,data=der_rdd_df,vcov="hetero")
-fit1_lan <- feols(crime_rate~period+treatd,data=lan_rdd_df,vcov="hetero")
-fit1_not <- feols(crime_rate~period+treatd,data=not_rdd_df,vcov="hetero")
+fit1_bed <- feols(crime_rate_per_100k~period+treatd,data=bed_rdd_df,vcov="hetero")
+fit1_cle <- feols(crime_rate_per_100k~period+treatd,data=cle_rdd_df,vcov="hetero")
+fit1_der <- feols(crime_rate_per_100k~period+treatd,data=der_rdd_df,vcov="hetero")
+fit1_lan <- feols(crime_rate_per_100k~period+treatd,data=lan_rdd_df,vcov="hetero")
+fit1_not <- feols(crime_rate_per_100k~period+treatd,data=not_rdd_df,vcov="hetero")
 
 ### RESULTS FOR NO HETEROGENEITY OF DIFFERENCE IN SLOPE CONTROLS ###
 etable(fit1_bed,fit1_cle,fit1_der,fit1_lan,fit1_not,signifCode=c("***"=0.01,"**"=0.05,"*"=0.10))
@@ -262,7 +242,7 @@ etable(fit1_bed,fit1_cle,fit1_der,fit1_lan,fit1_not,signifCode=c("***"=0.01,"**"
 ### RDD PACKAGE ESTIMATES ###
 
 period_bed <- bed_rdd_df$period
-crime_rate_bed <- bed_rdd_df$crime_rate
+crime_rate_bed <- bed_rdd_df$crime_rate_per_100k
 
 rdd_model_bed <- RDestimate(crime_rate_bed ~ period_bed, cutpoint = 17)
 summary(rdd_model_bed)

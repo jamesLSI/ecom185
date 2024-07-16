@@ -256,20 +256,27 @@ crime_w_population_w_pcc_data <- crime_w_population_w_pcc_data_no_pop %>%
   mutate(police_per_100k_pop = total/(pfa_population/100000),
          police_fte_per_100k_pop = total_fte/(pfa_population/100000))
 
-## remove extraneous objects ####
-rm(crime_data,
-   crime_w_population_data,
-   crime_w_population_w_pcc_data_no_pop,
-   police_force_LAD23_lookup,
-   population_data,
-   population_data_pfa,
-   i,
-   year_quarter_lookup,
-   pcc_by_year,
-   annual_police_numbers)
+## create summary dataframe for total crime numbers per PFA per period
+total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data %>% 
+  group_by(FinancialYear,
+           FinancialQuarter,
+           PFA23NM,
+           fy_q,
+           period) %>% 
+  summarise(all_crime = sum(NumberOfOffences,
+                            na.rm = T),
+            .groups = "drop") %>% 
+  left_join(crime_w_population_w_pcc_data %>% 
+              distinct(PFA23NM,
+                       fy_q,
+                       pfa_population,
+                       party,
+                       date,
+                       period),
+            by = join_by(PFA23NM, fy_q, period)) %>% 
+  mutate(crime_rate_per_100k = all_crime/(pfa_population/100000))
 
-
-## pcc chnages table ####
+## pcc changes table ####
 pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
                                sheet = 1,
                                .name_repair = namesFunction) %>% 
@@ -291,6 +298,17 @@ pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
          when_change,
          everything())
 
+## print summary of objects returned ####
+writeLines("Objects outputted to environment:\ncrime_w_population_w_pcc_data is individual offence counts per PFA per quarter\n\ntotal_crime_numbers_and_rate_w_population_w_pcc is total offence counts per PFA per quarter\n\npcc_change_table list PFA PCC Political Party Affilitaion over the 2012, 2016, and 2021 elections")
 
-
-
+## remove extraneous objects ####
+rm(crime_data,
+   crime_w_population_data,
+   crime_w_population_w_pcc_data_no_pop,
+   police_force_LAD23_lookup,
+   population_data,
+   population_data_pfa,
+   i,
+   year_quarter_lookup,
+   pcc_by_year,
+   annual_police_numbers)

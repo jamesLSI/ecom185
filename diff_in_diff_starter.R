@@ -6,7 +6,7 @@ if (!exists("crime_w_population_w_pcc_data")) {
 
 ## Conservative treatment ####
 ### table of only PCCs that are Labour in 2012 ####
-### this include those that are always abour and those that change.Excluding 2024 election they all happen to move to Conservative
+### this include those that are always labour and those that change. Excluding 2024 election they all happen to move to Conservative. Five change to Conservative, eight stay Labour
 labour_pccs <- pcc_change_table %>% 
   filter(X2012 == "Labour")
 
@@ -111,28 +111,8 @@ etable(lab_treat_reg1,lab_treat_reg2,signifCode=c("***"=0.01, "**"=0.05, "*"=0.1
 
 
 
-
+# PRESENTATION AND PAPER ANALYSIS ####
 # total offences ####
-
-### all crime summary  data ####
-all_crimes <- crime_w_population_w_pcc_data %>% 
-  group_by(FinancialYear,
-           FinancialQuarter,
-           PFA23NM,
-           fy_q,
-           period) %>% 
-  summarise(all_crime = sum(NumberOfOffences,
-                            na.rm = T),
-            .groups = "drop") %>% 
-  left_join(crime_w_population_w_pcc_data %>% 
-              distinct(PFA23NM,
-                       fy_q,
-                       pfa_population,
-                       party,
-                       date,
-                       period)) %>% 
-  mutate(crime_rate = all_crime/pfa_population)
-
 ### conservative treatment #### 
 ### table of only PCCs that are Labour in 2012
 ### this include those that are always abour and those that change.Excluding 2024 election they all happen to move to Conservative
@@ -140,7 +120,7 @@ labour_pccs <- pcc_change_table %>%
   filter(X2012 == "Labour")
 
 ### prepare data for regression ####
-all_crimes_w_treatment_dummy_conservative <- all_crimes %>% 
+total_crime_w_treatment_dummy_conservative <- total_crime_numbers_and_rate_w_population_w_pcc %>% 
   ## add in change date, and change type
   left_join(x = labour_pccs %>% 
               select(PFA23NM,
@@ -163,31 +143,38 @@ all_crimes_w_treatment_dummy_conservative <- all_crimes %>%
   mutate(treatd = treat*post)
 
 ### plot it ####
-all_crimes_w_treatment_dummy_conservative %>%
+total_crime_w_treatment_dummy_conservative %>%
   filter(!PFA23NM == "London, City of") %>% 
   distinct(FinancialYear,
            FinancialQuarter,
            PFA23NM,
            .keep_all = T) %>% 
-  ggplot(aes(x=factor(as.numeric(date)),y=crime_rate,colour=factor(treatd))) + 
+  ggplot(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,colour=factor(treatd))) + 
   geom_point(alpha=0.05) + 
-  geom_smooth(aes(x=factor(as.numeric(date)),y=crime_rate,group=factor(treatd)),formula = y~x, method="lm") + theme_bw()
+  geom_smooth(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,group=factor(treatd)),formula = y~x, method="lm") + 
+  theme_bw() +
+  labs(title = "All Crime Diff in Diff - PCC Party Labour and Labour to Conservative",
+       x = "Time Period",
+       y = "Crime Rate per 100k Population",
+       color = "Treated")
 
 ### regressions ####
-con_treat_reg1_all_crime <- all_crimes_w_treatment_dummy_conservative %>% 
-  feols(crime_rate~treat+treatd)
-con_treat_reg2_all_crime <- all_crimes_w_treatment_dummy_conservative %>%
-  feols(crime_rate~+treatd| PFA23NM+fy_q)
+con_treat_reg1_all_crime <- total_crime_w_treatment_dummy_conservative %>% 
+  feols(crime_rate_per_100k~treat+treatd)
+con_treat_reg2_all_crime <- total_crime_w_treatment_dummy_conservative %>%
+  feols(crime_rate_per_100k~+treatd| PFA23NM+fy_q)
 ## table of coefficients
-etable(con_treat_reg1_all_crime,con_treat_reg2_all_crime,signifCode=c("***"=0.01, "**"=0.05, "*"=0.10),se.below=TRUE)
+etable("Standard" = con_treat_reg1_all_crime,
+       "Fixed Effects" = con_treat_reg2_all_crime,
+       signifCode=c("***"=0.01, "**"=0.05, "*"=0.10),
+       se.below=TRUE)
 
 
 
 
 # function it ####
 
-### conversative treatment ####
-
+### conservative treatment ####
 ### make list of offence groups ####
 offence_groups_list <- crime_w_population_w_pcc_data %>% 
   filter(!OffenceGroup %in% c("Fraud offences",
