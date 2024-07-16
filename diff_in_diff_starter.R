@@ -50,7 +50,7 @@ crime_data_w_treatment_dummy_conservative %>%
 con_treat_reg1 <- crime_data_w_treatment_dummy_conservative %>% 
   feols(offence_group_per_100k~treat+treatd)
 con_treat_reg2 <- crime_data_w_treatment_dummy_conservative %>%
-  feols(offence_group_per_100k~+treatd| PFA23NM+fy_q)
+  feols(offence_group_per_100k~treatd| PFA23NM+fy_q)
 ## table of coefficients
 etable(con_treat_reg1,con_treat_reg2,signifCode=c("***"=0.01, "**"=0.05, "*"=0.10),se.below=TRUE)
 
@@ -99,13 +99,14 @@ crime_data_w_treatment_dummy_labour %>%
   filter(OffenceGroup == "Criminal damage and arson") %>% 
   ggplot(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,colour=factor(treatd))) + 
   geom_point(alpha=0.05) + 
-  geom_smooth(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,group=factor(treatd)),formula = y~x, method="lm") + theme_bw()
+  geom_smooth(aes(x=factor(as.numeric(date)),y=offence_group_per_100k,group=factor(treatd)),formula = y~x, method="lm") + 
+  theme_bw()
 
 ### regressions ####
 lab_treat_reg1 <- crime_data_w_treatment_dummy_labour %>% 
   feols(offence_group_per_100k~treat+treatd)
 lab_treat_reg2 <- crime_data_w_treatment_dummy_labour %>%
-  feols(offence_group_per_100k~+treatd| PFA23NM+fy_q)
+  feols(offence_group_per_100k~treatd| PFA23NM+fy_q)
 ## table of coefficients
 etable(lab_treat_reg1,lab_treat_reg2,signifCode=c("***"=0.01, "**"=0.05, "*"=0.10),se.below=TRUE)
 
@@ -144,14 +145,9 @@ total_crime_w_treatment_dummy_conservative <- total_crime_numbers_and_rate_w_pop
 
 ### plot it ####
 total_crime_w_treatment_dummy_conservative %>%
-  filter(!PFA23NM == "London, City of") %>% 
-  distinct(FinancialYear,
-           FinancialQuarter,
-           PFA23NM,
-           .keep_all = T) %>% 
-  ggplot(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,colour=factor(treatd))) + 
+  ggplot(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,colour=factor(treat))) + 
   geom_point(alpha=0.05) + 
-  geom_smooth(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,group=factor(treatd)),formula = y~x, method="lm") + 
+  geom_smooth(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,group=factor(treat)),formula = y~x, method="lm") + 
   theme_bw() +
   labs(title = "All Crime Diff in Diff - PCC Party Labour and Labour to Conservative",
        x = "Time Period",
@@ -162,7 +158,7 @@ total_crime_w_treatment_dummy_conservative %>%
 con_treat_reg1_all_crime <- total_crime_w_treatment_dummy_conservative %>% 
   feols(crime_rate_per_100k~treat+treatd)
 con_treat_reg2_all_crime <- total_crime_w_treatment_dummy_conservative %>%
-  feols(crime_rate_per_100k~+treatd| PFA23NM+fy_q)
+  feols(crime_rate_per_100k~treatd| PFA23NM+fy_q)
 ## table of coefficients
 etable("Standard" = con_treat_reg1_all_crime,
        "Fixed Effects" = con_treat_reg2_all_crime,

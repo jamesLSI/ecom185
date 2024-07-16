@@ -133,17 +133,17 @@ all_crimes_treated <- total_crime_numbers_and_rate_w_population_w_pcc %>%
                        treatd)) %>% 
   filter(!is.na(post))
 
-all_crimes_treated %>%
-  count(PFA23NM,treatd) 
+# all_crimes_treated %>%
+#   count(PFA23NM,treatd) 
 
 all_crimes_treated_rdd<- all_crimes_treated %>% 
   filter(treat==1)
 
-all_crimes_treated_rdd %>%
-  count(PFA23NM,treatd) 
+# all_crimes_treated_rdd %>%
+#   count(PFA23NM,treatd) 
 
 # view(all_crimes_treated_rdd)
-str(all_crimes_treated_rdd$PFA23NM)
+# str(all_crimes_treated_rdd$PFA23NM)
 # all_crimes_treated_rdd$PFA23NM <- as.character(all_crimes_treated_rdd$PFA23NM)
 
 ### CREATES DATA FRAMES FOR INDIVIDUAL FORCES THAT SWITCH PCC ###
@@ -156,10 +156,10 @@ not_rdd_df <- all_crimes_treated_rdd %>% filter(PFA23NM == "Nottinghamshire")
 
 ### RDD PLOTS FOR EACH FORCE WITH DASHED LINE AT POINT OF PCC CHANGE ###
 
-ggplot(bed_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
-  geom_point() +
-  geom_vline(xintercept = 17, linetype = "dashed") +
-  labs (title = "Bedfordshire PCC Change", x = "Time Period", y="Crime Rate")
+# ggplot(bed_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
+#   geom_point() +
+#   geom_vline(xintercept = 17, linetype = "dashed") +
+#   labs (title = "Bedfordshire PCC Change", x = "Time Period", y="Crime Rate")
 
 ### new plot
 bed_plot <- bed_rdd_df %>% 
@@ -167,14 +167,17 @@ bed_plot <- bed_rdd_df %>%
   ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
   geom_point(show.legend = FALSE) +
   geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
-  geom_vline(xintercept = 17, linetype = "dashed") +
+  geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
+  geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
   labs (title = "Bedfordshire PCC Change", x = "Time Period", y="Crime Rate",
-        color = "")
+        color = "") +
+  geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
+  geom_text(aes(x=38, label="2021 Election", y=min(crime_rate_per_100k, na.rm = T)), colour="red", angle=0)
 
-ggplot(cle_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
-  geom_point() +
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Cleveland PCC Change", x = "Time Period", y="Crime Rate")
+# ggplot(cle_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
+#   geom_point() +
+#   geom_vline(xintercept = 38, linetype = "dashed") +
+#   labs (title = "Cleveland PCC Change", x = "Time Period", y="Crime Rate")
 
 ### new plot
 cleve_plot <- cle_rdd_df %>% 
@@ -182,13 +185,16 @@ cleve_plot <- cle_rdd_df %>%
   ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
   geom_point(show.legend = FALSE) +
   geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
-  geom_vline(xintercept = 17, linetype = "dashed") +
-  labs (title = "Cleveland PCC Change", x = "Time Period", y="Crime Rate")
+  geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
+  geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
+  labs (title = "Cleveland PCC Change", x = "Time Period", y="Crime Rate") +
+  geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
+  geom_text(aes(x=38, label="2021 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0)
   
-ggplot(der_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
-  geom_point() +
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Derbyshire PCC Change", x = "Time Period", y="Crime Rate")
+# ggplot(der_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
+#   geom_point() +
+#   geom_vline(xintercept = 38, linetype = "dashed") +
+#   labs (title = "Derbyshire PCC Change", x = "Time Period", y="Crime Rate")
 
 ### new plot
 derby_plot <- der_rdd_df %>% 
@@ -196,35 +202,44 @@ derby_plot <- der_rdd_df %>%
   ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
   geom_point(show.legend = FALSE) +
   geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
-  geom_vline(xintercept = 17, linetype = "dashed") +
-  labs (title = "Derbyshire PCC Change", x = "Time Period", y="Crime Rate")
+  geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
+  geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
+  labs (title = "Derbyshire PCC Change", x = "Time Period", y="Crime Rate") +
+  geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
+  geom_text(aes(x=38, label="2021 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0)
 
 
-ggplot(lan_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
-  geom_point() +
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Lancashire PCC Change", x = "Time Period", y="Crime Rate")
+# ggplot(lan_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
+#   geom_point() +
+#   geom_vline(xintercept = 38, linetype = "dashed") +
+#   labs (title = "Lancashire PCC Change", x = "Time Period", y="Crime Rate")
 ### new plot
 lancs_plot <- lan_rdd_df %>% 
   mutate(threshold = as.factor(treatd)) %>% 
   ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
   geom_point(show.legend = FALSE) +
   geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
-  geom_vline(xintercept = 17, linetype = "dashed") +
-  labs (title = "Lancashire PCC Change", x = "Time Period", y="Crime Rate")
+  geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
+  geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
+  labs (title = "Lancashire PCC Change", x = "Time Period", y="Crime Rate") +
+  geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
+  geom_text(aes(x=38, label="2021 Election", y=min(crime_rate_per_100k, na.rm = T)), colour="red", angle=0)
 
-ggplot(not_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
-  geom_point() +
-  geom_vline(xintercept = 38, linetype = "dashed") +
-  labs (title = "Nottinghamshire PCC Change", x = "Time Period", y="Crime Rate")
+# ggplot(not_rdd_df, aes(x = period, y= crime_rate_per_100k)) +
+#   geom_point() +
+#   geom_vline(xintercept = 38, linetype = "dashed") +
+#   labs (title = "Nottinghamshire PCC Change", x = "Time Period", y="Crime Rate")
 ### new plot
-notts_plot <-  not_rdd_df %>% 
+notts_plot <- not_rdd_df %>% 
   mutate(threshold = as.factor(treatd)) %>% 
   ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
   geom_point(show.legend = FALSE) +
   geom_smooth(method = "lm", se = FALSE, show.legend = FALSE) + 
-  geom_vline(xintercept = 17, linetype = "dashed") +
-  labs (title = "Nottinghamshire PCC Change", x = "Time Period", y="Crime Rate")
+  geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
+  geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
+  labs (title = "Nottinghamshire PCC Change", x = "Time Period", y="Crime Rate") +
+  geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
+  geom_text(aes(x=38, label="2021 Election", y=min(crime_rate_per_100k, na.rm = T)), colour="red", angle=0)
 
 gridExtra::grid.arrange(bed_plot, cleve_plot, derby_plot, lancs_plot, notts_plot)
 
