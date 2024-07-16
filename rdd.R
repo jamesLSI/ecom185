@@ -82,7 +82,7 @@ if (!exists("crime_w_population_w_pcc_data")) {
 
 ## Conservative treatment ####
 ### table of only PCCs that are Labour in 2012 ####
-### this include those that are always abour and those that change.Excluding 2024 election they all happen to move to Conservative
+### this include those that are always Labour and those that change. Excluding 2024 election they all happen to move to Conservative
 labour_pccs <- pcc_change_table %>% 
   filter(X2012 == "Labour")
 
