@@ -1,5 +1,4 @@
 library(fixest)
-library(UsefulFunctions)
 if (!exists("crime_w_population_w_pcc_data")) {
   source("data_prep.R")
 }
