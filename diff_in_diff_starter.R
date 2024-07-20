@@ -145,10 +145,30 @@ total_crime_w_treatment_dummy_conservative <- total_crime_numbers_and_rate_w_pop
 
 ### plot it ####
 total_crime_w_treatment_dummy_conservative %>%
+  # filter(!PFA23NM == "Bedfordshire") %>% 
   ggplot(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,colour=factor(treat))) + 
   geom_point(alpha=0.05) + 
   geom_smooth(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,group=factor(treat)),formula = y~x, method="lm") + 
   theme_bw() +
+  geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
+  geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
+  geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
+  geom_text(aes(x=38, label="2021 Election", y=min(crime_rate_per_100k, na.rm = T)), colour="red", angle=0)+
+  labs(title = "All Crime Diff in Diff - PCC Party Labour and Labour to Conservative",
+       x = "Time Period",
+       y = "Crime Rate per 100k Population",
+       color = "Treated")
+
+total_crime_w_treatment_dummy_conservative %>%
+  # filter(!PFA23NM == "Bedfordshire") %>% 
+  ggplot(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,colour=factor(treatd))) + 
+  geom_point(alpha=0.05) + 
+  geom_smooth(aes(x=factor(as.numeric(period)),y=crime_rate_per_100k,group=factor(treatd)),formula = y~x, method="lm") + 
+  theme_bw() +
+  geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
+  geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
+  geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
+  geom_text(aes(x=38, label="2021 Election", y=min(crime_rate_per_100k, na.rm = T)), colour="red", angle=0)+
   labs(title = "All Crime Diff in Diff - PCC Party Labour and Labour to Conservative",
        x = "Time Period",
        y = "Crime Rate per 100k Population",
