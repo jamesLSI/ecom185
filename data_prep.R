@@ -254,7 +254,8 @@ crime_w_population_w_pcc_data <- crime_w_population_w_pcc_data_no_pop %>%
   left_join(annual_police_numbers,
             by = join_by(FinancialYear, PFA23NM)) %>% 
   mutate(police_per_100k_pop = total/(pfa_population/100000),
-         police_fte_per_100k_pop = total_fte/(pfa_population/100000))
+         police_fte_per_100k_pop = total_fte/(pfa_population/100000)) %>% 
+  filter(!PFA23NM == "London, City of")
 
 ## create summary dataframe for total crime numbers per PFA per period
 total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data %>% 
@@ -274,25 +275,31 @@ total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data
                        date,
                        period),
             by = join_by(PFA23NM, fy_q, period)) %>% 
-  mutate(crime_rate_per_100k = all_crime/(pfa_population/100000))
+  mutate(crime_rate_per_100k = all_crime/(pfa_population/100000)) %>% 
+  filter(!PFA23NM == "London, City of")
 
 ## pcc changes table ####
+### read in data
 pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
                                sheet = 1,
                                .name_repair = namesFunction) %>% 
+  ### select useful variables
   select(1:8,
          -X2024) %>% 
+  ### clean names to align to PRC data
   mutate(PFA23NM = str_replace_all(NameInDataset,
                                    "&",
                                    "and"),
          PFA23NM = if_else(PFA23NM == "Metropolitan Police Service",
                            "Metropolitan Police",
                            PFA23NM)) %>% 
+  ### create change variable as date
   mutate(when_change = if_else(X2012 != X2016,
                                lubridate::dmy("05-05-2016"),
                                if_else(X2016 != X2021,
                                        lubridate::dmy("06-05-2021"),
                                        NA))) %>% 
+  ### select final variables
   select(PFA23NM,
          ChangeType,
          when_change,
