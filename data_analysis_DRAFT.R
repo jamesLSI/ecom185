@@ -84,8 +84,8 @@ for (i in 1:nrow(pcc_change_table)) {
     ggplot(aes(x = period, y= crime_rate_per_100k, color = threshold)) +
     geom_point(show.legend = FALSE) +
     geom_smooth(method = "lm", se = FALSE, show.legend = FALSE, formula = 'y ~ x') + 
-    geom_vline(xintercept = 17, linetype = "dashed", color = "black", size = 1) +
-    geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", size = 1) +
+    geom_vline(xintercept = 17, linetype = "dashed", color = "black", linewidth = 1) +
+    geom_vline(xintercept = 38, linetype = "dashed", color = "darkturquoise", linewidth = 1) +
     labs (title = paste0(labour_pccs$PFA23NM[i]), x = "Time Period", y="Crime Rate",
           color = "") +
     geom_text(aes(x=17, label="2016 Election", y=min(crime_rate_per_100k, na.rm = T)+10), colour="red", angle=0) +
@@ -189,7 +189,7 @@ total_crime_rates_election_periods %>%
   ggplot(aes(x = percent_change, y = change_text, color = election_period)) +
   geom_point() + 
   labs (title = "% Change in crime rate in prior electoral period and election outcome",
-        y = "Election Outcome",
+        y = "",
         x = "% Change in prior electoral term",
         color = "")
 
