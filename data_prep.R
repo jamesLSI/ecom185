@@ -35,7 +35,7 @@ for (i in 3:14) {
 ## prepare population data ####
 
 ### read in population data
-population_data <- read_excel("data/LAD23_Mid_Year_pop_2011_to_2022.xlsx",
+population_data <- read_excel("data/LAD23_Mid_Year_pop_2011_to_2023.xlsx",
                               sheet = "MYE5",
                               .name_repair = namesFunction,
                               skip = 7) %>% 
@@ -90,19 +90,12 @@ population_data_pfa <- population_data %>%
   
 ### check if a delta between sum of joined populations and original data for England
 if(population_data_pfa %>% 
-   filter(FinancialYear == "2022/23") %>% 
+   filter(FinancialYear == "2023/24") %>% 
    summarise(Pop = sum(pfa_population,
                        na.rm = T)) - population_data$Population[1] == 0){
   print("DATA OKAY, NO DELTA")
 } else {
   print("DELTA CAUSED BY JOINING, CHECK")
-  
-  errors <- population_data_pfa %>% 
-    count(LAD23CD,
-          FinancialYear,
-          sort = T) %>% 
-    left_join(population_data_pfa)
-  
 }
 
 

@@ -1,9 +1,50 @@
 library(fixest)
 library(rdd)
+library(plotly)
 ## read in data only if it doesn't already exist in the environment
 if (!exists("crime_w_population_w_pcc_data")) {
   source("data_prep.R")
 }
+
+## plot crime rates over time per PFA ####
+### create vertical line helper
+vline <- function(x = 0, color = "green") {
+  list(
+    type = "line",
+    y0 = 0,
+    y1 = 0.93,
+    yref = "paper",
+    x0 = x,
+    x1 = x,
+    line = list(color = color, dash="dot")
+  )
+}
+
+### plot crime rates
+total_crime_numbers_and_rate_w_population_w_pcc %>%
+  plot_ly(type ="scatter",
+          mode = "lines",
+          x = ~period,
+          y = ~crime_rate_per_100k,
+          split = ~PFA23NM) %>% 
+  layout(title = "Crime Rate - Offences per 100k of population per period ",
+         xaxis = list(title = ""),
+         yaxis = list(title = ""),
+         shapes = list(vline(3),
+                       vline(17),
+                       vline(37))) %>% 
+  add_text(showlegend = FALSE, 
+           x = c(3), 
+           y = c(250),
+           text = c("2012 Election")) %>% 
+  add_text(showlegend = FALSE, 
+           x = c(17), 
+           y = c(250),
+           text = c("2016 Election")) %>% 
+  add_text(showlegend = FALSE, 
+           x = c(37), 
+           y = c(250),
+           text = c("2021 Election"))
 
 
 ## Conservative treatment data ####
@@ -163,13 +204,10 @@ total_crime_rates_election_periods <- total_crime_numbers_and_rate_w_population_
                                                    if_else(period > 36,
                                                            "2021to2024",
                                                            "2024 onwards"))))) %>% 
-  ### filter on first and last periods in the election cycle 
+  ### filter on first and last periods in full election cycles (excludes 2024 election as no crime data) 
   filter(period %in% c(1,3,17,37)) %>% 
-  arrange(PFA23NM) %>% 
-  ### fill down population to for crime rate calc 
-  fill(pfa_population) %>% 
-  ### create crime rate per population (will be inaccurate for later periods but huge population events unlikely)
-  mutate(crime_rate_per_100k = all_crime/(pfa_population/100000)) %>% 
+  arrange(PFA23NM,
+          period) %>% 
   group_by(PFA23NM) %>%
   ### calculate percentage change in crime rates over election period
   mutate(percent_change = (crime_rate_per_100k-lag(crime_rate_per_100k,1))/lag(crime_rate_per_100k,1)) %>% 
