@@ -1,4 +1,4 @@
-#### functions
+## functions ####
 
 namesFunction <- function(nms) {
   janitor::make_clean_names(nms, case = "upper_camel")}
@@ -8,7 +8,7 @@ clipboard_it <- function (data)
   write.table(data, "clipboard", sep = "\t", row.names = FALSE)
 }
 
-#### POLICE RECORDED CRIME DATA COLLECTION CODE ####
+## POLICE RECORDED CRIME DATA COLLECTION CODE ####
 # Data contains British Transport Police, Action Fraud and potentially other things so we may want to remove anything beyond the 43 police forces in England and Wales
 library(tidyverse)
 library(readODS)
