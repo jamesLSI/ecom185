@@ -257,8 +257,9 @@ con_treat_reg2_all_crime <- total_crime_numbers_treated %>%
 ### table of coefficients
 etable("Standard" = con_treat_reg1_all_crime,
        "Fixed Effects" = con_treat_reg2_all_crime,
-       signifCode=c("***"=0.01, "**"=0.05, "*"=0.10),
-       se.below=TRUE)
+       signif.code=c("***"=0.01, "**"=0.05, "*"=0.10),
+       se.below=TRUE) %>% 
+  clipboard_it()
 
 ### offence groups function
 

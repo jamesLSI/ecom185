@@ -109,7 +109,8 @@ crime_w_population_data <- crime_data %>%
                          "Cifas",
                          "CIFAS",
                          "Financial Fraud Action UK",
-                         "UK Finance")) %>% 
+                         "UK Finance",
+                         "London, City of")) %>% 
   ### arrange for easier reading
   arrange(PFA23NM,
           FinancialYear,
@@ -231,8 +232,7 @@ crime_w_population_w_pcc_data <- crime_w_population_w_pcc_data_no_pop %>%
   left_join(annual_police_numbers,
             by = join_by(FinancialYear, PFA23NM)) %>% 
   mutate(police_per_100k_pop = total/(pfa_population/100000),
-         police_fte_per_100k_pop = total_fte/(pfa_population/100000)) %>% 
-  filter(!PFA23NM == "London, City of")
+         police_fte_per_100k_pop = total_fte/(pfa_population/100000))
 
 ## create summary dataframe for total crime numbers per PFA per period
 total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data %>% 
@@ -252,8 +252,7 @@ total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data
                        date,
                        period),
             by = join_by(PFA23NM, fy_q, period)) %>% 
-  mutate(crime_rate_per_100k = all_crime/(pfa_population/100000)) %>% 
-  filter(!PFA23NM == "London, City of")
+  mutate(crime_rate_per_100k = all_crime/(pfa_population/100000))
 
 ## pcc changes table ####
 ### read in data
