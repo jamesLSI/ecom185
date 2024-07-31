@@ -207,14 +207,10 @@ pcc_by_year <- read_excel("data/pcc_list_by_year.xlsx",
 ## join crime and population data  to PCC political affiliation data####
 crime_w_population_w_pcc_data <- crime_w_population_data %>% 
   left_join(pcc_by_year,
-<<<<<<< HEAD
             by = join_by(FinancialYear, FinancialQuarter, PFA23NM)) %>% 
   ### remove extraneous variables
   select(-c(MidYear,
             PFA23CD))
-=======
-            by = join_by(FinancialYear, FinancialQuarter, PFA23NM))
->>>>>>> 61391e99c91f020cbd0abcad2eb6a7fd3e49d632
 
 ## create summary dataframe for total crime numbers per PFA per period
 total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data %>% 
