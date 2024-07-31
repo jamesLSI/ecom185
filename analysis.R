@@ -53,7 +53,7 @@ total_crime_numbers_and_rate_w_population_w_pcc %>%
 labour_pccs <- pcc_change_table %>% 
   filter(X2012 == "Labour")
 
-### prepare offence level crime data with conversative treatment dummy
+### prepare offence level crime data with Conservative treatment dummy
 crime_data_w_treatment_dummy_conservative <- crime_w_population_w_pcc_data %>% 
   ## add in change date, and change type
   left_join(x = labour_pccs %>% 
@@ -114,9 +114,7 @@ total_crime_w_treatment_dummy_conservative <- total_crime_numbers_and_rate_w_pop
   ## create a treat x post dummy given heterogeneous timing
   mutate(treatd = treat*post)
 
-## event study technique to test exogeneity of polictical party affiliation ####
-######## DOES THIS ADD ANYTHING TO THE PAPER?
-
+## event study technique to test exogeneity of political party affiliation ####
 ### create plot for each PCC that was Labour in 2012 and either changed once or stayed Labour
 for (i in 1:nrow(pcc_change_table)) {
   plot <- total_crime_numbers_treated %>% 
@@ -135,6 +133,7 @@ for (i in 1:nrow(pcc_change_table)) {
   assign(paste0(labour_pccs$PFA23NM[i], "_plot"), plot)
 }
 
+### plot all together
 gridExtra::grid.arrange(Bedfordshire_plot, Cleveland_plot,
                         Derbyshire_plot, Lancashire_plot,
                         Nottinghamshire_plot, Durham_plot,
@@ -145,8 +144,8 @@ gridExtra::grid.arrange(Bedfordshire_plot, Cleveland_plot,
 
 
 
-## testing for exogeneity of pcc affiliation changes ####
-### pcc election outcomes per election period
+## testing for exogeneity of PCC affiliation changes ####
+### PCC election outcomes per election period
 #### read in data
 pcc_change_table_w_2024 <- read_excel("data/pcc_list_by_year.xlsx",
                                       sheet = 1,
