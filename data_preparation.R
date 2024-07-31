@@ -8,15 +8,16 @@ clipboard_it <- function (data)
   write.table(data, "clipboard", sep = "\t", row.names = FALSE)
 }
 
-## POLICE RECORDED CRIME DATA COLLECTION CODE ####
-# Data contains British Transport Police, Action Fraud and potentially other things so we may want to remove anything beyond the 43 police forces in England and Wales
+## packages ####
 library(tidyverse)
 library(readODS)
 library(readxl)
-## get list of sheets in ods to ensure select correct one in loop ####
+
+## POLICE RECORDED CRIME DATA COLLECTION CODE ####
+## when using new data this gets list of sheets in ods to ensure select correct ones in loop ####
 #readODS::list_ods_sheets("data/Police Recorded Crime Data.ods")
 
-## read in all useful sheets (exclude first and second sheets) and combine into tidy format ####
+## read in all annual crime data sheets and combine into tidy format ####
 for (i in 3:14) {
   sheet <- read_ods("data/Police Recorded Crime Data.ods",
                     sheet = i,
@@ -33,7 +34,6 @@ for (i in 3:14) {
 }
 
 ## prepare population data ####
-
 ### read in population data
 population_data <- read_excel("data/LAD23_Mid_Year_pop_2011_to_2023.xlsx",
                               sheet = "MYE5",
@@ -56,11 +56,11 @@ population_data <- read_excel("data/LAD23_Mid_Year_pop_2011_to_2023.xlsx",
                               str_sub(MidYear+1, start = 3, end = 4), 
                               sep = "/"))
 
-### read in LAD23 to Pokice force area lookup file
+### read in LAD23 to Police Force Area lookup file
 police_force_LAD23_lookup <- read_csv("data/Local_Authority_District_to_CSPs_to_Police_Force_Areas_(December__2023)_Lookup_.csv",
                                       show_col_types = FALSE,
                                       progress = F) %>% 
-  ### remove community safety partnership names and codes
+  ### select only Local Authority District and Police Force Area names and codes
   select(contains(c("LAD", "PFA"))) %>% 
   ### remove duplicates caused by community safety partnership
   distinct(LAD23CD,
@@ -77,18 +77,18 @@ population_data_pfa <- population_data %>%
             by = join_by(LAD23CD, LAD23NM)) %>% 
   ### remove higher order areas (countries, counties etc.)
   filter(!is.na(PFA23CD)) %>% 
+  ### group by PFA and Year
   group_by(MidYear,
            FinancialYear,
            PFA23CD,
            PFA23NM) %>% 
-  summarise(paf_area_sq_km = sum(AreaSqKm,
-                                 na.rm = T),
-            pfa_population = sum(Population,
+  ### sum annual PFA populations from constituent LADs and ungroup
+  summarise(pfa_population = sum(Population,
                                  na.rm = T),
             .groups = "drop")
-  
-  
-### check if a delta between sum of joined populations and original data for England
+
+### check if a delta between sum of joined populations and original data for England & Wales in 23/24
+### this ensures the filter, group, and summarise has worked correctly)
 if(population_data_pfa %>% 
    filter(FinancialYear == "2023/24") %>% 
    summarise(Pop = sum(pfa_population,
@@ -98,12 +98,11 @@ if(population_data_pfa %>%
   print("DELTA CAUSED BY JOINING, CHECK")
 }
 
-
 ## join crime and population data ####
 crime_w_population_data <- crime_data %>% 
   left_join(population_data_pfa,
             by = join_by(FinancialYear, PFA23NM)) %>% 
-  ### remove other areas 
+  ### remove other non-geographic PFAs and City of London Police as they do not have PCCs 
   filter(!PFA23NM %in% c("Action Fraud",
                          "British Transport Police",
                          "Cifas",
@@ -118,7 +117,7 @@ crime_w_population_data <- crime_data %>%
           OffenceSubgroup,
           OffenceDescription,
           FinancialQuarter) %>% 
-  ### summarise for offence group and sub group total
+  ### Generate Offence Group and Subgroup totals per PFA per reporting period
   mutate(OffenceGroup_total = sum(NumberOfOffences,
                                   na.rm = T),
          .by = c(PFA23NM,
@@ -131,7 +130,7 @@ crime_w_population_data <- crime_data %>%
                  FinancialYear,
                  FinancialQuarter,
                  OffenceSubgroup)) %>% 
-  ### create crimes per population variables
+  ### create crimes rate per 100k population
   mutate(offence_per_100k = NumberOfOffences / (pfa_population/100000),
          offence_subgroup_per_100k = OffenceSubgroup_total / (pfa_population/100000),
          offence_group_per_100k = OffenceGroup_total / (pfa_population/100000)) %>% 
@@ -152,7 +151,7 @@ crime_w_population_data <- crime_data %>%
   ### create combined financial year and financial quarter variable
   mutate(fy_q = paste(FinancialYear, FinancialQuarter, sep = "_"))
 
-
+## create a 'lookup' to give PCC data Financial Year, Quarter, and Period for later joining
 year_quarter_lookup <- tibble(year = rep(2012, 3),
                               quarter = rep(2:4,1)) %>% 
   bind_rows(tibble(year = rep(2013:2024, each = 4),
@@ -173,6 +172,7 @@ year_quarter_lookup <- tibble(year = rep(2012, 3),
                                     4)) %>% 
   mutate(period = row_number())
 
+## create table of PFA PCC political affiliation by period for joining to crime data
 pcc_by_year <- read_excel("data/pcc_list_by_year.xlsx",
                           sheet = "wider",
                           .name_repair = namesFunction) %>% 
@@ -204,46 +204,27 @@ pcc_by_year <- read_excel("data/pcc_list_by_year.xlsx",
   select(-c(year,
             quarter))
 
-crime_w_population_w_pcc_data_no_pop <- crime_w_population_data %>% 
+## join crime and population data  to PCC political affiliation data####
+crime_w_population_w_pcc_data <- crime_w_population_data %>% 
   left_join(pcc_by_year,
-            by = join_by(FinancialYear, FinancialQuarter, PFA23NM))
-
-## read in police numbers data ####
-
-annual_police_numbers <- readODS::read_ods("data/open-data-table-police-workforce-260723.ods",
-                                           sheet = "Data",
-                                           .name_repair = namesFunction) %>% 
-  mutate(FinancialYear = paste0(AsAt31March-1,
-                                "/",
-                                str_sub(AsAt31March,
-                                        3, 4))) %>% 
-  mutate(TotalFte = suppressWarnings(as.numeric(TotalFte))) %>% 
-  group_by(FinancialYear,
-           PFA23NM = ForceName) %>% 
-  summarise(total = sum(TotalHeadcount,
-                        na.rm = T),
-            total_fte = sum(TotalFte,
-                            na.rm = T),
-            .groups = "drop")
-
-## add to crime and pcc data ####
-
-crime_w_population_w_pcc_data <- crime_w_population_w_pcc_data_no_pop %>% 
-  left_join(annual_police_numbers,
-            by = join_by(FinancialYear, PFA23NM)) %>% 
-  mutate(police_per_100k_pop = total/(pfa_population/100000),
-         police_fte_per_100k_pop = total_fte/(pfa_population/100000))
+            by = join_by(FinancialYear, FinancialQuarter, PFA23NM)) %>% 
+  ### remove extraneous variables
+  select(-c(MidYear,
+            PFA23CD))
 
 ## create summary dataframe for total crime numbers per PFA per period
 total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data %>% 
+  ### group by period, and PFA
   group_by(FinancialYear,
            FinancialQuarter,
            PFA23NM,
            fy_q,
            period) %>% 
+  ### summarise to sum all crime data per period per PFA and ungroup
   summarise(all_crime = sum(NumberOfOffences,
                             na.rm = T),
             .groups = "drop") %>% 
+  ### join to provide PCC party affiliation
   left_join(crime_w_population_w_pcc_data %>% 
               distinct(PFA23NM,
                        fy_q,
@@ -252,6 +233,7 @@ total_crime_numbers_and_rate_w_population_w_pcc <- crime_w_population_w_pcc_data
                        date,
                        period),
             by = join_by(PFA23NM, fy_q, period)) %>% 
+  ### generate crime rate per period per PFA
   mutate(crime_rate_per_100k = all_crime/(pfa_population/100000))
 
 ## pcc changes table ####
@@ -279,7 +261,9 @@ pcc_change_table <- read_excel("data/pcc_list_by_year.xlsx",
   select(PFA23NM,
          ChangeType,
          when_change,
-         everything())
+         X2012,
+         X2016,
+         X2021)
 
 ## print summary of objects returned ####
 writeLines("Objects outputted to environment:\ncrime_w_population_w_pcc_data is individual offence counts per PFA per quarter\n\ntotal_crime_numbers_and_rate_w_population_w_pcc is total offence counts per PFA per quarter\n\npcc_change_table list PFA PCC Political Party Affilitaion over the 2012, 2016, and 2021 elections")
@@ -287,11 +271,9 @@ writeLines("Objects outputted to environment:\ncrime_w_population_w_pcc_data is 
 ## remove extraneous objects ####
 rm(crime_data,
    crime_w_population_data,
-   crime_w_population_w_pcc_data_no_pop,
    police_force_LAD23_lookup,
    population_data,
    population_data_pfa,
    i,
    year_quarter_lookup,
-   pcc_by_year,
-   annual_police_numbers)
+   pcc_by_year)
